@@ -44,7 +44,7 @@ public class HeadHunter
         }
         using (WebResponse PostResponse = PostRequest.GetResponse())
         {
-            using(StreamReader reader = new StreamReader(PostResponse.GetResponseStream()))
+            using (StreamReader reader = new StreamReader(PostResponse.GetResponseStream()))
             {
                 string html = reader.ReadToEnd();
                 string tag = "\"mainmenu_userName\">";
@@ -86,6 +86,56 @@ public class HeadHunter
                 UserName = UserName.Remove(UserName.IndexOf('<'));
             }
         }
+    }
+    /// <summary>
+    /// Добавляет ключевые навыки в резюме.
+    /// </summary>
+    /// <param name="id">Идентификатор резюме</param>
+    /// <param name="skills">Массив навыков</param>
+    public void SetSkills(string id, string[] skills)
+    {
+        HttpWebRequest req = (HttpWebRequest)WebRequest.Create(String.Format("http://hh.ru/applicant/resumes/edit/experience?resume={0}&field=keySkills", id));
+        req.CookieContainer = cookies;
+        req.Method = "POST";
+        req.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+        string data = "";
+        foreach (var skill in skills)
+        {
+            data += "keySkills.string="+skill + "&";
+        }
+        data += "_xsrf="+token;
+        byte[] sentData = Encoding.ASCII.GetBytes(data);
+        req.ContentLength = sentData.Length;
+        using (Stream stream = req.GetRequestStream())
+        {
+            stream.Write(sentData, 0, sentData.Length);
+        }
+        using (WebResponse GetResponse = req.GetResponse()) ;
+    }
+    /// <summary>
+    /// Асихнорнно добавляет ключевые навыки в резюме.
+    /// </summary>
+    /// <param name="id">Идентификатор резюме</param>
+    /// <param name="skills">Массив навыков</param>
+    public async Task SetSkillsAsync(string id, string[] skills)
+    {
+        HttpWebRequest req = (HttpWebRequest)WebRequest.Create(String.Format("http://hh.ru/applicant/resumes/edit/experience?resume={0}&field=keySkills", id));
+        req.CookieContainer = cookies;
+        req.Method = "POST";
+        req.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+        string data = "";
+        foreach (var skill in skills)
+        {
+            data += "keySkills.string=" + skill + "&";
+        }
+        data += "_xsrf=" + token;
+        byte[] sentData = Encoding.ASCII.GetBytes(data);
+        req.ContentLength = sentData.Length;
+        using (Stream stream = await req.GetRequestStreamAsync())
+        {
+            await stream.WriteAsync(sentData, 0, sentData.Length);
+        }
+        using (WebResponse GetResponse = await req.GetResponseAsync()) ;
     }
     /// <summary>
     /// Асинхронно возвращает список идентификаторов.
@@ -150,7 +200,7 @@ public class HeadHunter
     {
         List<string> collection = new List<string>();
         collection = GetAllId();
-        foreach(var resume in collection)
+        foreach (var resume in collection)
         {
             UpdateResumeById(resume);
         }
