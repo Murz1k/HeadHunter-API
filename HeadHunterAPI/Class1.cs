@@ -88,6 +88,60 @@ public class HeadHunter
         }
     }
     /// <summary>
+    /// Асинхронно возвращает массив умений.
+    /// </summary>
+    /// <param name="id">Идентификатор резюме</param>
+    /// <returns>Асинхронно возвращает массив умений.</returns>
+    public async Task<string[]> GetSkillsAsync(string id)
+    {
+        List<string> array = new List<string>();
+        var PostRequest = WebRequest.Create("http://hh.ru/applicant/resumes/view?resume=" + id) as HttpWebRequest;
+        PostRequest.CookieContainer = cookies;
+        using (WebResponse PostResponse = await PostRequest.GetResponseAsync())
+        {
+            using (StreamReader reader = new StreamReader(PostResponse.GetResponseStream()))
+            {
+                string html = reader.ReadToEnd();
+                string tag = "HH/Resume/Endorsement";
+                html = html.Remove(0, html.IndexOf(tag) + tag.Length);
+                html = html.Remove(html.IndexOf("></script>"));
+                while (html.IndexOf("text") > -1)
+                {
+                    html = html.Remove(0, html.IndexOf("text") + 8);
+                    array.Add(html.Remove(html.IndexOf(',') - 1));
+                }
+            }
+        }
+        return array.ToArray();
+    }
+    /// <summary>
+    /// Возвращает массив умений.
+    /// </summary>
+    /// <param name="id">Идентификатор резюме</param>
+    /// <returns>Возвращает массив умений.</returns>
+    public string[] GetSkills(string id)
+    {
+        List<string>array = new List<string>();
+        var PostRequest = WebRequest.Create("http://hh.ru/applicant/resumes/view?resume=" + id) as HttpWebRequest;
+        PostRequest.CookieContainer = cookies;
+        using (WebResponse PostResponse = PostRequest.GetResponse())
+        {
+            using (StreamReader reader = new StreamReader(PostResponse.GetResponseStream()))
+            {
+                string html = reader.ReadToEnd();
+                string tag = "HH/Resume/Endorsement";
+                html = html.Remove(0, html.IndexOf(tag)+tag.Length);
+                html = html.Remove(html.IndexOf("></script>"));
+                while(html.IndexOf("text")>-1)
+                {
+                    html = html.Remove(0, html.IndexOf("text") + 8);
+                    array.Add(html.Remove(html.IndexOf(',') - 1));
+                }
+            }
+        }
+        return array.ToArray();
+    }
+    /// <summary>
     /// Добавляет ключевые навыки в резюме.
     /// </summary>
     /// <param name="id">Идентификатор резюме</param>
