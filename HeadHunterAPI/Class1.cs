@@ -300,19 +300,25 @@ using System.Threading.Tasks;
             string data = "resume=" + id + "&undirectable=true";
             await PostAsync(url, data);
         }
+        /// <summary>
+        /// Осуществляет GET-запрос.
+        /// </summary>
+        /// <param name="url">Ссылка</param>
+        /// <returns></returns>
         internal StreamReader Get (string url)
         {
             var Get = WebRequest.Create(url) as HttpWebRequest;
             Get.CookieContainer = cookies;
             Get.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10240";
-            using (WebResponse GetResponse = Get.GetResponse())
-            {
-                using (Stream stream = GetResponse.GetResponseStream())
-                {
-                    return new StreamReader(stream);
-                }
-            }
-        }
+            WebResponse GetResponse = Get.GetResponse();
+            Stream stream = GetResponse.GetResponseStream();
+            return new StreamReader(stream);
+        } 
+        /// <summary>
+        /// Асинхронно осуществляет GET-запрос.
+        /// </summary>
+        /// <param name="url">Ссылка</param>
+        /// <returns></returns>
         internal async Task<StreamReader> GetAsync(string url)
         {
             var Get = WebRequest.Create(url) as HttpWebRequest;
@@ -326,6 +332,11 @@ using System.Threading.Tasks;
                 }
             }
         }
+        /// <summary>
+        /// Получает коллекцию откликов с указанной страницы.
+        /// </summary>
+        /// <param name="id_page">Идентификатор страницы</param>
+        /// <returns></returns>
         public Dictionary<int, string> GetAllNegotiations(int id_page)
         {
             Dictionary<int, string> negotiations = new Dictionary<int, string>();
@@ -357,12 +368,24 @@ using System.Threading.Tasks;
                 return negotiations;
             }
         }
-        public async Task DeleteNegotiationById(int id,int id_page)
+        /// <summary>
+        /// Асинхронно удаляет отклик с указанным идентификатором на указанной странице.
+        /// </summary>
+        /// <param name="id">Идентификатор отклика</param>
+        /// <param name="id_page">Идентификатор страницы</param>
+        /// <returns></returns>
+        public async Task DeleteNegotiationByIdAsync(int id,int id_page)
         {
             string url = "http://hh.ru/applicant/negotiations/trash/";
             string data = "topic=" + id + "&query=%3Fpage%3D" + id_page + "%26filter%3Dactive_and_archived%26&substate=HIDE&_xsrf=" + token;
             await PostAsync(url,data);
         }
+        /// <summary>
+        /// Асинхронно осуществляет POST-запрос.
+        /// </summary>
+        /// <param name="url">Ссылка</param>
+        /// <param name="data">Данные</param>
+        /// <returns></returns>
         internal async Task PostAsync(string url, string data)
         {
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
@@ -378,6 +401,12 @@ using System.Threading.Tasks;
             }
             using (WebResponse GetResponse = await req.GetResponseAsync()) ;
         }
+        /// <summary>
+        /// Осуществляет POST-запрос.
+        /// </summary>
+        /// <param name="url">Ссылка</param>
+        /// <param name="data">Данные</param>
+        /// <returns></returns>
         internal void Post(string url, string data)
         {
             HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
